@@ -21,7 +21,7 @@ def plot_learning_curve(epochs, train_mse, train_ratios, val_mse=None, val_ratio
         plt.plot(epochs, train_mse, color="red", label="MSE (Train)")
 
         if val_mse:
-            print("Here")
+
             plt.plot(epochs, val_mse, color="red", label="MSE (Val)", linestyle='--')
 
         plt.title(f'MSE every {len(epochs)} epochs')
