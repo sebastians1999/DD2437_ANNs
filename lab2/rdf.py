@@ -17,7 +17,11 @@ class RBFNetwork:
 
 
         
+        if X.ndim == 1:
+            X = X.reshape(-1, 1)
+
         X = np.atleast_2d(X)
+
         #X = np.transpose(X). -> changed for last task.
         N, D = X.shape
 
@@ -119,6 +123,7 @@ class RBFNetwork:
     
     def phi_matrix(self, X):
 
+        #print(f"Shape of X before phi matrix transformation: {X.shape}")
         phi_matrix = np.zeros((len(X), len(self.centers)))
 
         for i, x in enumerate(X):
@@ -152,11 +157,11 @@ class RBFNetwork:
 
         epoch_reached = False
         epoch_count = 0
-        train_mse_history = []
-        test_mse_history = []
+        train_mae_history = []
+        test_mae_history = []
 
 
-        train_mse_history.append(mse(targets=y_train, predicted=self.predict(X_train))) #error at epoch 0
+        train_mae_history.append(mse(targets=y_train, predicted=self.predict(X_train))) #error at epoch 0
 
         while not epoch_reached: 
 
@@ -171,15 +176,15 @@ class RBFNetwork:
                 error = y_shuffled[i] - y_pred
                 self.weights += eta * np.outer(phi_vector, error) 
 
-            train_mse_history.append(mse(targets=y_train, predicted=self.predict(X_train)))
-            test_mse_history.append(mse(targets=y_test, predicted=self.predict(X_test)))
+            train_mae_history.append(mae(y_true=y_train, y_pred=self.predict(X_train)))
+            test_mae_history.append(mae(y_true=y_test, y_pred=self.predict(X_test)))
 
             epoch_count += 1
 
             if epoch_count == num_epoch:
                 epoch_reached = True
 
-        return  train_mse_history, test_mse_history
+        return  train_mae_history, test_mae_history
 
 
     def predict(self, X):
