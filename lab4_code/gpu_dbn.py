@@ -139,7 +139,7 @@ class DeepBeliefNet():
             
         return
 
-    def train_greedylayerwise(self, vis_trainset, lbl_trainset, n_iterations):
+    def train_greedylayerwise(self, vis_trainset, lbl_trainset, n_iterations, epochs=20):
 
         """
         Greedy layer-wise training by stacking RBMs. This method first tries to load previous saved parameters of the entire RBM stack. 
@@ -169,14 +169,17 @@ class DeepBeliefNet():
             print ("training vis--hid")
             """ 
             CD-1 training for vis--hid 
-            """            
+            """
+            self.rbm_stack['vis--hid'].cd1(visible_trainset=vis_trainset, n_iterations=n_iterations, epochs=epochs, file_prefix="vis--hid")
             self.savetofile_rbm(loc="trained_rbm",name="vis--hid")
 
             print ("training hid--pen")
             """ 
             CD-1 training for hid--pen 
-            """            
-            self.rbm_stack["vis--hid"].untwine_weights()            
+            """ 
+            self.rbm_stack["vis--hid"].untwine_weights()
+            _, visible_h1 = self.rbm_stack['vis--hid'].get_h_given_v_dir(vis_trainset)
+            self.rbm_stack['hid--pen'].cd1(visible_trainset=visible_h1, n_iterations=n_iterations, epochs=epochs, file_prefix="hid--pen")                   
             self.savetofile_rbm(loc="trained_rbm",name="hid--pen")            
 
             print ("training pen+lbl--top")
@@ -184,6 +187,9 @@ class DeepBeliefNet():
             CD-1 training for pen+lbl--top 
             """
             self.rbm_stack["hid--pen"].untwine_weights()
+            _, visible_h2 = self.rbm_stack['hid--pen'].get_h_given_v_dir(visible_h1)
+            visible_top = xp.block([visible_h2, lbl_trainset])
+            self.rbm_stack['pen+lbl--top'].cd1(visible_trainset=visible_top, n_iterations=n_iterations, epochs=epochs, file_prefix="pen+lbl--top")
             self.savetofile_rbm(loc="trained_rbm",name="pen+lbl--top")            
 
         return    
