@@ -1,12 +1,11 @@
 
-USE_GPU = True
+USE_GPU = False
 
-if USE_GPU:
-  import cupy as xp
-  xp.cuda.runtime.getDeviceCount()
-else:
-  import numpy as xp
-
+# if USE_GPU:
+#   import cupy as xp
+#   xp.cuda.runtime.getDeviceCount()
+# else:
+import numpy as xp
 import matplotlib.pyplot as plt
 
 def sigmoid(support):

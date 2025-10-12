@@ -1,3 +1,4 @@
+from cProfile import label
 from gpu_util import *
 
 class RestrictedBoltzmannMachine():
@@ -195,7 +196,7 @@ class RestrictedBoltzmannMachine():
         # As Lab QA Q4 and paper suggests; implement momentum and weight decay, to make learning robustness and to fix exploding gradient
 
         # Calculate the gradients
-        grad_weights_vh = ((v_0.T @ h_0) - (v_k.T @ h_k)) / v_0.shape[0]
+        grad_weights_vh = ((v_0.T @ h_0) - (v_k.T @ h_k)) / v_0.shape[0] # divide by the size f the mini-batch as learning rate
         grad_bias_v = xp.mean(v_0 - v_k, axis=0)
         grad_bias_h = xp.mean(h_0 - h_k, axis=0)
 
@@ -275,7 +276,24 @@ class RestrictedBoltzmannMachine():
             # [TODO TASK 4.1] compute probabilities and activations (samples from probabilities) of visible layer (replace the pass below). \
             # Note that this section can also be postponed until TASK 4.2, since in this task, stand-alone RBMs do not contain labels in visible layer.
             
-            pass
+            # compute total input
+            support = (hidden_minibatch @ self.weight_vh.T) + self.bias_v
+            
+            # split into data part and label part (from slides)
+            data_support = support[:, :-self.n_labels]
+            label_support = support[:, -self.n_labels:]
+            
+            # different activations, softmax activation for label nodes and bernoulli sampling
+            p_v_data = sigmoid(data_support)
+            v_data = xp.random.binomial(n=1, p=p_v_data)
+            
+            p_v_labels = softmax(label_support)
+            v_labels = xp.random.multinomial(1, p_v_labels)
+            
+            p_v_given_h = xp.concatenate([p_v_data, p_v_labels], axis=1)
+            activations = xp.concatenate([v_data,v_labels], axis=1)
+            
+            return p_v_given_h, activations
             
         else:
                         
@@ -285,9 +303,8 @@ class RestrictedBoltzmannMachine():
             p_v_given_h = sigmoid(sigmoid_input)
             activations = xp.random.binomial(n=1, p=p_v_given_h) # Binomoial with n=1 is Bernoulli distribution.           
 
-            # pass
+
         return p_v_given_h, activations
-        # return xp.zeros((n_samples,self.ndim_visible)), xp.zeros((n_samples,self.ndim_visible))
 
 
     
@@ -314,13 +331,18 @@ class RestrictedBoltzmannMachine():
            both are shaped (size of mini-batch, size of hidden layer)
         """
         
-        assert self.weight_v_to_h is not None
+        assert self.weight_v_to_h is not None #check that weights are not none
 
         n_samples = visible_minibatch.shape[0]
 
         # [TODO TASK 4.2] perform same computation as the function 'get_h_given_v' but with directed connections (replace the zeros below) 
         
-        return xp.zeros((n_samples,self.ndim_hidden)), xp.zeros((n_samples,self.ndim_hidden))
+        # Our implementation
+        sigmoid_input = (visible_minibatch @ self.weight_v_to_h) + self.bias_h
+        p_h_given_v_dir = sigmoid(sigmoid_input)
+        activations_dir = xp.random.binomial(n=1, p=p_h_given_v_dir) # Binomoial with n=1 is Bernoulli distribution.
+        
+        return p_h_given_v_dir, activations_dir
 
 
     def get_v_given_h_dir(self,hidden_minibatch):
@@ -354,15 +376,20 @@ class RestrictedBoltzmannMachine():
             # this case should never be executed : when the RBM is a part of a DBN and is at the top, it will have not have directed connections.
             # Appropriate code here is to raise an error (replace pass below)
             
-            pass
+            # our implementation
+            raise Exception("Error: Top RBM should not use directed weights. " +
+                                "Use get_v_given_h() instead of get_v_given_h_dir()")
             
         else:
-                        
-            # [TODO TASK 4.2] performs same computaton as the function 'get_v_given_h' but with directed connections (replace the pass and zeros below)             
-
-            pass
+ 
+            # [TODO TASK 4.2] performs same computaton as the function 'get_v_given_h' but with directed connections (replace the pass and zeros below)      
+            # Our implementation: 
+ 
+            sigmoid_input = (hidden_minibatch @ self.weight_h_to_v) + self.bias_v
+            p_v_given_h_dir = sigmoid(sigmoid_input)
+            activations_dir = xp.random.binomial(n=1, p=p_v_given_h_dir)
             
-        return xp.zeros((n_samples,self.ndim_visible)), xp.zeros((n_samples,self.ndim_visible))        
+            return p_v_given_h_dir, activations_dir
         
     def update_generate_params(self,inps,trgs,preds):
         

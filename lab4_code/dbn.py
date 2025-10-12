@@ -1,6 +1,7 @@
 from util import *
 from rbm import RestrictedBoltzmannMachine
 
+
 class DeepBeliefNet():    
 
     ''' 
