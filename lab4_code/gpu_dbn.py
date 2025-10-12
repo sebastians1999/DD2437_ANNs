@@ -132,7 +132,7 @@ class DeepBeliefNet():
         # top to the bottom visible layer (replace 'vis' from random to your generated visible layer).
  
         # according to slides (or what can be derived) initialised by sampling from bias of visible layer, other methods are possible for this too
-        pen_bias = self.rbm_stack['pen+lbl--top'].bias_v[:,self.sizes["pen"]]
+        pen_bias = self.rbm_stack['pen+lbl--top'].bias_v[:-self.n_labels]
         probs_pen_bias = sigmoid(pen_bias)
         pen_initial = xp.random.binomial(n=1, p=probs_pen_bias, size=(n_sample, self.sizes["pen"]))
         
@@ -151,8 +151,9 @@ class DeepBeliefNet():
             pen = pen_lbl[:, :self.sizes["pen"]]     
             _, hid = self.rbm_stack['hid--pen'].get_v_given_h_dir(pen)         
             _, vis = self.rbm_stack['vis--hid'].get_v_given_h_dir(hid)
-        
-            
+
+            if USE_GPU:
+                vis = xp.asnumpy(vis)
             records.append( [ ax.imshow(vis.reshape(self.image_size), cmap="bwr", vmin=0, vmax=1, animated=True, interpolation=None) ] )
             
         anim = stitch_video(fig,records).save("%s.generate%d.mp4"%(name,xp.argmax(true_lbl)))            
