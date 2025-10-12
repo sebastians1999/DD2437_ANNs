@@ -4,3 +4,8 @@ lab4_dataset/
 *.png
 *.pyc
 *.npy
+*lab4_dataset/
+*/__pycache__
+*.python-version
+*pyproject.toml
+*uv.lock
