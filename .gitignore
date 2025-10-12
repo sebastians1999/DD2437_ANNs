@@ -3,3 +3,4 @@ lab4_code/*.mp4
 lab4_dataset/
 *.png
 *.pyc
+*.npy
