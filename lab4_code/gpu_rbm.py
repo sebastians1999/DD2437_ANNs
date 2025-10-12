@@ -83,12 +83,14 @@ class RestrictedBoltzmannMachine():
         reconstruction_loss_list = []
         
         n_samples = visible_trainset.shape[0]
+        batch_inds = xp.arange(n_samples)
 
         for epoch in range(epochs):
             if epoch > 5:
                 self.momentum = 0.9 # Increase momentum, as said in paper
 
-            xp.random.shuffle(visible_trainset)
+            #xp.random.shuffle(visible_trainset)
+            xp.random.shuffle(batch_inds)
 
             for i in range(0, n_samples, self.batch_size):
 
@@ -101,7 +103,8 @@ class RestrictedBoltzmannMachine():
                 
                 # Ivan 2025-10-10: Our code
                 # Assuming mini batches of the images should be taken randomly
-                v0 = visible_trainset[xp.random.choice(a=n_samples, size=self.batch_size, replace=False)]
+                #v0 = visible_trainset[xp.random.choice(a=n_samples, size=self.batch_size, replace=False)]
+                v0 = visible_trainset[batch_inds[i:i+self.batch_size]]
 
                 # Alternating Gibbs sampling with k=1 steps
                 p_h0_given_v0, h0 = self.get_h_given_v(visible_minibatch=v0)
@@ -115,7 +118,8 @@ class RestrictedBoltzmannMachine():
                 
 
                 # [TODO TASK 4.1] update the parameters using function 'update_params'
-                self.update_params(v_0=v0, h_0=h0, v_k=v1, h_k=h1)
+                #self.update_params(v_0=v0, h_0=h0, v_k=v1, h_k=h1)
+                self.update_params(v_0=v0, h_0=h0, v_k=p_v1_given_h0, h_k=p_h1_given_v1)
                 
             # visualize once in a while when visible layer is input images
             if self.is_bottom:
