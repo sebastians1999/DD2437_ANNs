@@ -1,6 +1,6 @@
 from util import *
 
-import cupy as cp
+#import cupy as cp
 
 class RestrictedBoltzmannMachine():
     '''
