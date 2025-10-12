@@ -135,11 +135,13 @@ class DeepBeliefNet():
         pen_bias = self.rbm_stack['pen+lbl--top'].bias_v[:-self.n_labels]
         probs_pen_bias = sigmoid(pen_bias)
         pen_initial = xp.random.binomial(n=1, p=probs_pen_bias, size=(n_sample, self.sizes["pen"]))
+        pen_initial = xp.random.binomial(n=1, p=0.5, size=(n_sample, self.sizes["pen"]))
+        pen = pen_initial
         
         for _ in range(self.n_gibbs_gener):
             
             
-            pen_lbl = xp.concatenate([pen_initial,lbl],axis=1)
+            pen_lbl = xp.concatenate([pen,lbl],axis=1)
             
             # calculate hidden layer of last rbm
             _, top = self.rbm_stack['pen+lbl--top'].get_h_given_v(pen_lbl)
