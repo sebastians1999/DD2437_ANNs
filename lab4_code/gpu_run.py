@@ -1,6 +1,7 @@
 from gpu_util import *
 from gpu_rbm import RestrictedBoltzmannMachine 
 from gpu_dbn import DeepBeliefNet
+from gpu_rbm_stacked import StackedRBM
 import time
 
 if __name__ == "__main__":
@@ -98,3 +99,21 @@ if __name__ == "__main__":
     #     digit_1hot = xp.zeros(shape=(1,10))
     #     digit_1hot[0,digit] = 1
     #     dbn.generate(digit_1hot, name="dbn")
+    # 
+    # 
+    stacked_rbm = StackedRBM(sizes={"vis":image_size[0]*image_size[1], "hid":500, "pen":500},
+                             image_size=image_size,
+                             batch_size=20)
+    
+    if USE_GPU:
+        xp.cuda.Stream.null.synchronize()
+    t0 = time.time()
+    
+    recon_loss1, recon_loss2 = stacked_rbm.train_greedylayerwise(vis_trainset=train_imgs, n_iterations=10000, epochs=20)
+    
+    if USE_GPU:
+        xp.cuda.Stream.null.synchronize()
+    print("Elapsed:", time.time() - t0)
+    
+    reconstruction_loss_list = [recon_loss1, recon_loss2]
+    plot_reconstruction_loss(reconstruction_loss=reconstruction_loss_list, file_prefix="stacked_rbm")
