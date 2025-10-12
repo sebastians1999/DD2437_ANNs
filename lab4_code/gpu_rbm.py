@@ -53,7 +53,7 @@ class RestrictedBoltzmannMachine():
 
         self.learning_rate = 0.01
         
-        self.momentum = 0.7 # 2025-10-10 Ivan: Was 0.7, changed to 0.5 according to paper
+        self.momentum = 0.5 # 2025-10-10 Ivan: Was 0.7, changed to 0.5 according to paper
 
         self.weight_cost = weight_cost # 2025-10-10 Ivan: Added to use in weight decay
 
@@ -132,6 +132,11 @@ class RestrictedBoltzmannMachine():
             reconstruction_loss = xp.linalg.norm(v0 - v1)
             print(f"epoch={epoch}, recon_loss={reconstruction_loss}")
             reconstruction_loss_list.append(reconstruction_loss) # Used for task 4.1.2
+
+            # Check if unstable loss, reduce learning rate if that is the case
+            if len(reconstruction_loss_list) > 1:
+                if reconstruction_loss_list[-1] - reconstruction_loss_list[-1] > 1:
+                    self.learning_rate /= 2 
 
         # # Old loop, replaced with epochs above
         # for it in range(n_iterations):
