@@ -128,10 +128,28 @@ class DeepBeliefNet():
 
         # [TODO TASK 4.2] fix the label in the label layer and run alternating Gibbs sampling in the top RBM. From the top RBM, drive the network \ 
         # top to the bottom visible layer (replace 'vis' from random to your generated visible layer).
-            
+ 
+        # according to slides (or what can be derived) initialised by sampling from bias of visible layer, other methods are possible for this too
+        pen_bias = self.rbm_stack['pen+lbl--top'].bias_v[:,self.sizes["pen"]]
+        probs_pen_bias = sigmoid(pen_bias)
+        pen_initial = xp.random.binomial(n=1, p=probs_pen_bias, size=(n_sample, self.sizes["pen"]))
+        
         for _ in range(self.n_gibbs_gener):
-
-            vis = xp.random.rand(n_sample,self.sizes["vis"])
+            
+            
+            pen_lbl = xp.concatenate([pen_initial,lbl],axis=1)
+            
+            # calculate hidden layer of last rbm
+            _, top = self.rbm_stack['pen+lbl--top'].get_h_given_v(pen_lbl)
+             
+            # calculate visible layer of last rbm   
+            _, pen_lbl = self.rbm_stack['pen+lbl--top'].get_v_given_h(top)
+            
+            #from here downward pass through the network              
+            pen = pen_lbl[:, :self.sizes["pen"]]     
+            _, hid = self.rbm_stack['hid--pen'].get_v_given_h_dir(pen)         
+            _, vis = self.rbm_stack['vis--hid'].get_v_given_h_dir(hid)
+        
             
             records.append( [ ax.imshow(vis.reshape(self.image_size), cmap="bwr", vmin=0, vmax=1, animated=True, interpolation=None) ] )
             
