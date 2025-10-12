@@ -1,5 +1,7 @@
 from gpu_util import *
 from gpu_rbm import RestrictedBoltzmannMachine
+if USE_GPU:
+    import numpy as np
 
 
 #This is a straight copy from dbn.py
@@ -82,7 +84,7 @@ class DeepBeliefNet():
         
         for batch_start in range(0,n_samples,self.batch_size):
             
-            batch_end = min(batch_start,self.batch_size,n_samples)
+            batch_end = min(batch_start+self.batch_size,n_samples)
             batch_size = batch_start - batch_end
             
             vis_batch = vis[batch_start:batch_end]
@@ -130,7 +132,7 @@ class DeepBeliefNet():
         # top to the bottom visible layer (replace 'vis' from random to your generated visible layer).
  
         # according to slides (or what can be derived) initialised by sampling from bias of visible layer, other methods are possible for this too
-        pen_bias = self.rbm_stack['pen+lbl--top'].bias_v[:,self.sizes["pen"]]
+        pen_bias = self.rbm_stack['pen+lbl--top'].bias_v[:-self.n_labels]
         probs_pen_bias = sigmoid(pen_bias)
         pen_initial = xp.random.binomial(n=1, p=probs_pen_bias, size=(n_sample, self.sizes["pen"]))
         
@@ -149,8 +151,9 @@ class DeepBeliefNet():
             pen = pen_lbl[:, :self.sizes["pen"]]     
             _, hid = self.rbm_stack['hid--pen'].get_v_given_h_dir(pen)         
             _, vis = self.rbm_stack['vis--hid'].get_v_given_h_dir(hid)
-        
-            
+
+            if USE_GPU:
+                vis = xp.asnumpy(vis)
             records.append( [ ax.imshow(vis.reshape(self.image_size), cmap="bwr", vmin=0, vmax=1, animated=True, interpolation=None) ] )
             
         anim = stitch_video(fig,records).save("%s.generate%d.mp4"%(name,xp.argmax(true_lbl)))            
@@ -206,7 +209,12 @@ class DeepBeliefNet():
             """
             self.rbm_stack["hid--pen"].untwine_weights()
             probs_h2, visible_h2 = self.rbm_stack['hid--pen'].get_h_given_v_dir(visible_h1)
-            visible_top = xp.block([probs_h2, lbl_trainset])
+            visible_top = xp.concatenate([probs_h2, lbl_trainset], axis=1)
+            # if USE_GPU:
+            #     visible_top = xp.array(np.block([xp.asnumpy(probs_h2), xp.asnumpy(lbl_trainset)]))
+            # else:
+            #     visible_top = xp.block([probs_h2, lbl_trainset])
+            
             self.rbm_stack['pen+lbl--top'].cd1(visible_trainset=visible_top, n_iterations=n_iterations, epochs=epochs, file_prefix="pen+lbl--top")
             self.savetofile_rbm(loc="trained_rbm",name="pen+lbl--top")            
 

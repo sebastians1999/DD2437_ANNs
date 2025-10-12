@@ -288,7 +288,12 @@ class RestrictedBoltzmannMachine():
             v_data = xp.random.binomial(n=1, p=p_v_data)
             
             p_v_labels = softmax(label_support)
-            v_labels = xp.random.multinomial(1, p_v_labels)
+            #print(p_v_labels.shape)
+            curr_batch_size = p_v_labels.shape[0]
+            v_labels = xp.zeros((curr_batch_size, self.n_labels))
+            for i in range(curr_batch_size):
+                v_labels[i] = xp.random.multinomial(1, p_v_labels[i])
+            #v_labels = xp.random.multinomial(1, p_v_labels)
             
             p_v_given_h = xp.concatenate([p_v_data, p_v_labels], axis=1)
             activations = xp.concatenate([v_data,v_labels], axis=1)
