@@ -124,9 +124,9 @@ def viz_rf(weights, it, grid, file_prefix=None):
             axs[x,y].imshow(weights[:,:,y+grid[1]*x], cmap="bwr", vmin=-imax, vmax=imax, interpolation=None)
     
     if file_prefix:
-      plt.savefig(f"{file_prefix}_rf.iter{it:06d}.png")
+      plt.savefig(f"img/{file_prefix}_rf.iter{it:06d}.png")
     else:
-      plt.savefig(f"rf.iter{it:06d}.png")
+      plt.savefig(f"img/rf.iter{it:06d}.png")
     plt.close('all')
 
 # 2025-10-10 Ivan - Newly added function, to plot histogram
@@ -136,29 +136,25 @@ def plot_histograms(weights, it, file_prefix=None):
     plt.hist(weights.flatten(), bins=50)
     plt.title(f"Weights distribution epoch {it}")
     if file_prefix:
-      plt.savefig(f"{file_prefix}_rf.hist.iter{it:06d}.png")
+      plt.savefig(f"img/{file_prefix}_rf.hist.iter{it:06d}.png")
     else:
-      plt.savefig(f"rf.hist.iter{it:06d}.png")
+      plt.savefig(f"img/rf.hist.iter{it:06d}.png")
     plt.close('all')
 
 # 2025-10-11 Ivan - Newly added function, to plot reconstruction loss
 def plot_reconstruction_loss(reconstruction_loss, file_prefix=None):
-    recon_list = []
-    if USE_GPU:
-        for r in reconstruction_loss:
-           recon_list.append(xp.asnumpy(r))
-    else:
-        recon_list = reconstruction_loss
-
-    epochs = len(recon_list)
     plt.figure(figsize=(10, 6))
-    plt.plot(epochs, recon_list[0], marker='o', color='blue', label='Hidden units = 500')
-    plt.plot(epochs, recon_list[1], marker='o', color='red', label='Hidden units = 200')
+    plt.plot(range(len(reconstruction_loss[0])), reconstruction_loss[0], marker='o', color='blue', label='Hidden units = 500')
+    plt.plot(range(len(reconstruction_loss[1])), reconstruction_loss[1], marker='o', color='red', label='Hidden units = 200')
     plt.title(f"Reconstruction loss comparison per epoch")
+    plt.xlabel('Epoch')
+    plt.ylabel('Reconstruction loss')
+    plt.grid(True)
+    plt.legend()
     if file_prefix:
-      plt.savefig(f"{file_prefix}_rf.reconstruction_loss.png")
+      plt.savefig(f"img/{file_prefix}_rf.reconstruction_loss.png")
     else:
-      plt.savefig(f"rf.reconstruction_loss.png")
+      plt.savefig(f"img/rf.reconstruction_loss.png")
     plt.close('all')
     
 

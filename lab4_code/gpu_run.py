@@ -14,8 +14,58 @@ if __name__ == "__main__":
     print ("\nStarting a Restricted Boltzmann Machine..")
     reconstruction_loss_list = []
     
-    # 2025-10-10 Ivan: Duplicate this to do 4.1.2
-    ##### New RBM with Hidden nodes = 500 #####
+    # ########## Task 4.1 ##########
+    # # 2025-10-10 Ivan: Duplicate this to do 4.1.2
+    # ##### New RBM with Hidden nodes = 500 #####
+    # rbm = RestrictedBoltzmannMachine(ndim_visible=image_size[0]*image_size[1],
+    #                                  ndim_hidden=500, # Ivan 2025-10-10: Was initially 200, but both video and task 4.1 says start with 500?? So we strart with 500
+    #                                  is_bottom=True,
+    #                                  image_size=image_size,
+    #                                  is_top=False,
+    #                                  n_labels=10,
+    #                                  batch_size=20 # Changed to 20 as task 4.1 says
+    # )
+    # # Start clock
+    # if USE_GPU:
+    #     xp.cuda.Stream.null.synchronize()
+    # t0 = time.time()
+    
+    # recon_loss = rbm.cd1(visible_trainset=train_imgs, n_iterations=10000, epochs=20, file_prefix="4.1.2_500hn")
+    
+    # # Stop clock
+    # if USE_GPU:
+    #     xp.cuda.Stream.null.synchronize()
+    # print("Elapsed:", time.time() - t0)
+    # reconstruction_loss_list.append(recon_loss)
+
+    # ##### New RBM with Hidden nodes = 200 #####
+    # rbm = RestrictedBoltzmannMachine(ndim_visible=image_size[0]*image_size[1],
+    #                                  ndim_hidden=200, # Ivan 2025-10-10: Was initially 200, but both video and task 4.1 says start with 500?? So we strart with 500
+    #                                  is_bottom=True,
+    #                                  image_size=image_size,
+    #                                  is_top=False,
+    #                                  n_labels=10,
+    #                                  batch_size=20 # Changed to 20 as task 4.1 says
+    # )
+    
+    # # Start clock
+    # if USE_GPU:
+    #     xp.cuda.Stream.null.synchronize()
+    # t0 = time.time()
+    
+    # recon_loss = rbm.cd1(visible_trainset=train_imgs, n_iterations=10000, epochs=20, file_prefix="4.1.2_200hn")
+
+    # # Stop clock
+    # if USE_GPU:
+    #     xp.cuda.Stream.null.synchronize()
+    # print("Elapsed:", time.time() - t0)
+
+    # reconstruction_loss_list.append(recon_loss)
+
+    # plot_reconstruction_loss(reconstruction_loss=reconstruction_loss_list, file_prefix="4.1.2")
+
+    ########## Task 4.2 ##########
+    # First RB;
     rbm = RestrictedBoltzmannMachine(ndim_visible=image_size[0]*image_size[1],
                                      ndim_hidden=500, # Ivan 2025-10-10: Was initially 200, but both video and task 4.1 says start with 500?? So we strart with 500
                                      is_bottom=True,
@@ -35,33 +85,6 @@ if __name__ == "__main__":
     if USE_GPU:
         xp.cuda.Stream.null.synchronize()
     print("Elapsed:", time.time() - t0)
-    reconstruction_loss_list.append(recon_loss)
-
-    ##### New RBM with Hidden nodes = 200 #####
-    rbm = RestrictedBoltzmannMachine(ndim_visible=image_size[0]*image_size[1],
-                                     ndim_hidden=200, # Ivan 2025-10-10: Was initially 200, but both video and task 4.1 says start with 500?? So we strart with 500
-                                     is_bottom=True,
-                                     image_size=image_size,
-                                     is_top=False,
-                                     n_labels=10,
-                                     batch_size=20 # Changed to 20 as task 4.1 says
-    )
-    
-    # Start clock
-    if USE_GPU:
-        xp.cuda.Stream.null.synchronize()
-    t0 = time.time()
-    
-    recon_loss = rbm.cd1(visible_trainset=train_imgs, n_iterations=10000, epochs=20, file_prefix="4.1.2_200hn")
-
-    # Stop clock
-    if USE_GPU:
-        xp.cuda.Stream.null.synchronize()
-    print("Elapsed:", time.time() - t0)
-
-    reconstruction_loss_list.append(recon_loss)
-
-    plot_reconstruction_loss(reconstruction_loss=reconstruction_loss_list, file_prefix="4.1.2")
     
     # ''' deep- belief net '''
 

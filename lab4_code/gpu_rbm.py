@@ -90,6 +90,7 @@ class RestrictedBoltzmannMachine():
 
             xp.random.shuffle(visible_trainset)
 
+            epoch_loss = [] # Wll be used to calculate the average reconstruction loss 
             for i in range(0, n_samples, self.batch_size):
 
             # Old loop, replaces with epochs
@@ -116,6 +117,8 @@ class RestrictedBoltzmannMachine():
 
                 # [TODO TASK 4.1] update the parameters using function 'update_params'
                 self.update_params(v_0=v0, h_0=h0, v_k=v1, h_k=h1)
+                reconstruction_loss = xp.linalg.norm(v0 - v1)
+                epoch_loss.append(reconstruction_loss)
                 
             # visualize once in a while when visible layer is input images
             if self.is_bottom:
@@ -125,9 +128,9 @@ class RestrictedBoltzmannMachine():
                 plot_histograms(weights=self.weight_vh, it=epoch, file_prefix=file_prefix)
 
             # print progress
-            reconstruction_loss = xp.linalg.norm(v0 - v1)
-            print(f"epoch={epoch}, recon_loss={reconstruction_loss}")
-            reconstruction_loss_list.append(reconstruction_loss) # Used for task 4.1.2
+            mean_epoch_recon_loss = xp.mean(xp.asarray(epoch_loss)) # Convert list to numpy or cupy array and then take the mean of it, to get mean loss of mini batches
+            print(f"epoch={epoch}, mean_recon_loss={mean_epoch_recon_loss}, type={type(mean_epoch_recon_loss)}")
+            reconstruction_loss_list.append(float(mean_epoch_recon_loss)) # Used for task 4.1.2
 
         # # Old loop, replaced with epochs above
         # for it in range(n_iterations):
