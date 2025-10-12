@@ -131,11 +131,11 @@ class DeepBeliefNet():
             
         for _ in range(self.n_gibbs_gener):
 
-            vis = np.random.rand(n_sample,self.sizes["vis"])
+            vis = xp.random.rand(n_sample,self.sizes["vis"])
             
             records.append( [ ax.imshow(vis.reshape(self.image_size), cmap="bwr", vmin=0, vmax=1, animated=True, interpolation=None) ] )
             
-        anim = stitch_video(fig,records).save("%s.generate%d.mp4"%(name,np.argmax(true_lbl)))            
+        anim = stitch_video(fig,records).save("%s.generate%d.mp4"%(name,xp.argmax(true_lbl)))            
             
         return
 
@@ -178,8 +178,8 @@ class DeepBeliefNet():
             CD-1 training for hid--pen 
             """ 
             self.rbm_stack["vis--hid"].untwine_weights()
-            _, visible_h1 = self.rbm_stack['vis--hid'].get_h_given_v_dir(vis_trainset)
-            self.rbm_stack['hid--pen'].cd1(visible_trainset=visible_h1, n_iterations=n_iterations, epochs=epochs, file_prefix="hid--pen")                   
+            probs_h1, visible_h1 = self.rbm_stack['vis--hid'].get_h_given_v_dir(vis_trainset)
+            self.rbm_stack['hid--pen'].cd1(visible_trainset=probs_h1, n_iterations=n_iterations, epochs=epochs, file_prefix="hid--pen")                   
             self.savetofile_rbm(loc="trained_rbm",name="hid--pen")            
 
             print ("training pen+lbl--top")
@@ -187,8 +187,8 @@ class DeepBeliefNet():
             CD-1 training for pen+lbl--top 
             """
             self.rbm_stack["hid--pen"].untwine_weights()
-            _, visible_h2 = self.rbm_stack['hid--pen'].get_h_given_v_dir(visible_h1)
-            visible_top = xp.block([visible_h2, lbl_trainset])
+            probs_h2, visible_h2 = self.rbm_stack['hid--pen'].get_h_given_v_dir(visible_h1)
+            visible_top = xp.block([probs_h2, lbl_trainset])
             self.rbm_stack['pen+lbl--top'].cd1(visible_trainset=visible_top, n_iterations=n_iterations, epochs=epochs, file_prefix="pen+lbl--top")
             self.savetofile_rbm(loc="trained_rbm",name="pen+lbl--top")            
 
@@ -246,33 +246,33 @@ class DeepBeliefNet():
     
     def loadfromfile_rbm(self,loc,name):
         
-        self.rbm_stack[name].weight_vh = np.load("%s/rbm.%s.weight_vh.npy"%(loc,name))
-        self.rbm_stack[name].bias_v    = np.load("%s/rbm.%s.bias_v.npy"%(loc,name))
-        self.rbm_stack[name].bias_h    = np.load("%s/rbm.%s.bias_h.npy"%(loc,name))
+        self.rbm_stack[name].weight_vh = xp.load("%s/rbm.%s.weight_vh.npy"%(loc,name))
+        self.rbm_stack[name].bias_v    = xp.load("%s/rbm.%s.bias_v.npy"%(loc,name))
+        self.rbm_stack[name].bias_h    = xp.load("%s/rbm.%s.bias_h.npy"%(loc,name))
         print ("loaded rbm[%s] from %s"%(name,loc))
         return
         
     def savetofile_rbm(self,loc,name):
         
-        np.save("%s/rbm.%s.weight_vh"%(loc,name), self.rbm_stack[name].weight_vh)
-        np.save("%s/rbm.%s.bias_v"%(loc,name),    self.rbm_stack[name].bias_v)
-        np.save("%s/rbm.%s.bias_h"%(loc,name),    self.rbm_stack[name].bias_h)
+        xp.save("%s/rbm.%s.weight_vh"%(loc,name), self.rbm_stack[name].weight_vh)
+        xp.save("%s/rbm.%s.bias_v"%(loc,name),    self.rbm_stack[name].bias_v)
+        xp.save("%s/rbm.%s.bias_h"%(loc,name),    self.rbm_stack[name].bias_h)
         return
     
     def loadfromfile_dbn(self,loc,name):
         
-        self.rbm_stack[name].weight_v_to_h = np.load("%s/dbn.%s.weight_v_to_h.npy"%(loc,name))
-        self.rbm_stack[name].weight_h_to_v = np.load("%s/dbn.%s.weight_h_to_v.npy"%(loc,name))
-        self.rbm_stack[name].bias_v        = np.load("%s/dbn.%s.bias_v.npy"%(loc,name))
-        self.rbm_stack[name].bias_h        = np.load("%s/dbn.%s.bias_h.npy"%(loc,name))
+        self.rbm_stack[name].weight_v_to_h = xp.load("%s/dbn.%s.weight_v_to_h.npy"%(loc,name))
+        self.rbm_stack[name].weight_h_to_v = xp.load("%s/dbn.%s.weight_h_to_v.npy"%(loc,name))
+        self.rbm_stack[name].bias_v        = xp.load("%s/dbn.%s.bias_v.npy"%(loc,name))
+        self.rbm_stack[name].bias_h        = xp.load("%s/dbn.%s.bias_h.npy"%(loc,name))
         print ("loaded rbm[%s] from %s"%(name,loc))
         return
         
     def savetofile_dbn(self,loc,name):
         
-        np.save("%s/dbn.%s.weight_v_to_h"%(loc,name), self.rbm_stack[name].weight_v_to_h)
-        np.save("%s/dbn.%s.weight_h_to_v"%(loc,name), self.rbm_stack[name].weight_h_to_v)
-        np.save("%s/dbn.%s.bias_v"%(loc,name),        self.rbm_stack[name].bias_v)
-        np.save("%s/dbn.%s.bias_h"%(loc,name),        self.rbm_stack[name].bias_h)
+        xp.save("%s/dbn.%s.weight_v_to_h"%(loc,name), self.rbm_stack[name].weight_v_to_h)
+        xp.save("%s/dbn.%s.weight_h_to_v"%(loc,name), self.rbm_stack[name].weight_h_to_v)
+        xp.save("%s/dbn.%s.bias_v"%(loc,name),        self.rbm_stack[name].bias_v)
+        xp.save("%s/dbn.%s.bias_h"%(loc,name),        self.rbm_stack[name].bias_h)
         return
     
