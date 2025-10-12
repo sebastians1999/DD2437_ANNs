@@ -145,15 +145,20 @@ def plot_reconstruction_loss(reconstruction_loss, file_prefix=None):
     recon_list = []
     if USE_GPU:
         for r in reconstruction_loss:
-           recon_list.append(xp.asnumpy(r))
+          #  print(f"r type: {type(r)}")
+          #  print(f"r[0] type: {type(r[0])}")
+          #  print(r[0])
+          recon_list.append(list(map(xp.asnumpy, r)))
     else:
         recon_list = reconstruction_loss
 
-    epochs = len(recon_list)
+    epochs_0 = list(range(len(recon_list[0])))
+    epochs_1 = list(range(len(recon_list[1])))
     plt.figure(figsize=(10, 6))
-    plt.plot(epochs, recon_list[0], marker='o', color='blue', label='Hidden units = 500')
-    plt.plot(epochs, recon_list[1], marker='o', color='red', label='Hidden units = 200')
+    plt.plot(epochs_0, recon_list[0], marker='o', color='blue', label='Hidden units = 500')
+    plt.plot(epochs_1, recon_list[1], marker='o', color='red', label='Hidden units = 200')
     plt.title(f"Reconstruction loss comparison per epoch")
+    plt.legend()
     if file_prefix:
       plt.savefig(f"{file_prefix}_rf.reconstruction_loss.png")
     else:
